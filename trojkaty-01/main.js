@@ -19,7 +19,7 @@ const loader = new GLTFLoader();
 
 
 // Material
-const material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false} );
+const material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true} );
 // material.side = THREE.DoubleSide;
 
 // BufferGeometry
