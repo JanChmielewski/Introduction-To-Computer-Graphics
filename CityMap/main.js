@@ -75,7 +75,7 @@ backRightGrass.position.set(0.3, 0.01,-0.3);
 cityBlock.add(frontLeftGrass, frontRightGrass, backLeftGrass, backRightGrass);
 
 const laneDividersGeometry = new THREE.BoxGeometry(0.005, 0.0001, 0.015);
-const laneDividersMaterial = new THREE.MeshBasicMaterial({colorL: 0xFFFFFF});
+const laneDividersMaterial = new THREE.MeshBasicMaterial({color: 0xFFFFFF});
 const laneDivider = new THREE.Mesh(laneDividersGeometry, laneDividersMaterial);
 
 const laneDividers = new THREE.Group();
@@ -94,8 +94,149 @@ for (let position = 0.485; position >= -0.5; position -= 0.025) {
     }
 }
 
-
 cityBlock.add(laneDividers);
+
+// creating an apartment building
+
+const apartmentBuilding = new THREE.Group();
+
+const apartmentBuildingStructureGeometry = new THREE.BoxGeometry(0.2, 0.4,0.2);
+const apartmentBuildingStructureMaterial = new THREE.MeshBasicMaterial({color: 0x8D8D8D} )
+const apartmentBuildingStructure = new THREE.Mesh(apartmentBuildingStructureGeometry, apartmentBuildingStructureMaterial);
+
+const buildingRoofGeometry = new THREE.ConeGeometry(0.14, 0.1, 4, 1, false, 0.78,6.283185307179586);
+const buildingRoofMaterial = new THREE.MeshBasicMaterial({color: 0x777777} );
+const buildingRoof = new THREE.Mesh(buildingRoofGeometry, buildingRoofMaterial);
+
+buildingRoof.position.set(0,0.25,0);
+
+const buildingDoorGeometry = new THREE.BoxGeometry(0.04, 0.08,0.001);
+const buildingDoorMaterial = new THREE.MeshBasicMaterial({color: 0x8C4A26});
+const buildingDoor = new THREE.Mesh(buildingDoorGeometry, buildingDoorMaterial);
+
+buildingDoor.position.set(0, -0.16, -0.1);
+
+apartmentBuilding.add(apartmentBuildingStructure, buildingRoof, buildingDoor);
+
+apartmentBuilding.position.set(0.3, 0.214, 0.3);
+cityBlock.add(apartmentBuilding);
+
+const park = new THREE.Group();
+
+const tree = new THREE.Group();
+
+const leavesGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+const leavesMaterial = new THREE.MeshBasicMaterial({ color: 0x358C26 }); // Green color
+const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+
+const treeTrunkGeometry = new THREE.CylinderGeometry(0.01,0.01, 0.08, 16, 1, false, 0, 6.5);
+const treeTrunkMaterial = new THREE.MeshBasicMaterial({color: 0x6A381D});
+const treeTrunk = new THREE.Mesh(treeTrunkGeometry, treeTrunkMaterial);
+
+treeTrunk.position.set(0.3,0.05,-0.3);
+leaves.position.set(0.3,0.095, -0.3);
+
+tree.add(treeTrunk, leaves);
+
+const bush = new THREE.Group();
+
+const bushGeometry = new THREE.SphereGeometry(0.03, 5, 4, 0, 3.14, 0, 3.14);
+const bushMaterial = new THREE.MeshBasicMaterial({color: 0x53BD3F});
+const bushLeaves = new THREE.Mesh(bushGeometry, bushMaterial);
+
+bushLeaves.rotation.x = -Math.PI / 2;
+bushLeaves.position.set(0.3,0.0005, -0.3);
+
+// TODO: add fruits on the bush
+
+bush.add(bushLeaves);
+
+const parkWidth = 0.3;
+const parkLength = 0.3;
+
+const minDistance = 0.1;
+const treePositions = [];
+const bushPositions = [];
+
+
+// Loop for the tree placement
+for (let i = 0; i < 5; i++) {
+    const parkTree = tree.clone();
+
+    let validPosition = false;
+    let attempts = 0;
+
+    while (!validPosition) {
+        // Generate random X and Z positions within the park area
+        const randomX = (Math.random() * parkWidth) - parkWidth / 2;
+        const randomZ = (Math.random() * parkLength) - parkLength / 2;
+
+        let isCollision = false;
+        for (const position of treePositions) {
+            const distance = Math.sqrt(Math.pow(randomX - position.x, 2) + Math.pow(randomZ - position.z, 2));
+            if (distance < minDistance) {
+                isCollision = true;
+                break;
+            }
+        }
+
+        if (!isCollision) {
+            parkTree.position.set(randomX, 0, randomZ);
+            treePositions.push({ x: randomX, z: randomZ });
+            validPosition = true;
+        }
+
+        attempts++;
+        if (attempts > 1000) {
+            console.error("Could not find a suitable position for the tree.");
+            break;
+        }
+    }
+
+    park.add(parkTree);
+}
+
+// Loop for the bush placement
+
+for (let i = 0; i < 5; i++) {
+    const parkBush = bush.clone();
+
+    let validPosition = false;
+    let attempts = 0;
+
+    while (!validPosition) {
+        // Generate random X and Z positions within the park area
+        const randomX = (Math.random() * parkWidth) - parkWidth / 2;
+        const randomZ = (Math.random() * parkLength) - parkLength / 2;
+
+        let isCollision = false;
+        for (const position of bushPositions) {
+            const distance = Math.sqrt(Math.pow(randomX - position.x, 2) + Math.pow(randomZ - position.z, 2));
+            if (distance < minDistance) {
+                isCollision = true;
+                break;
+            }
+        }
+
+        if (!isCollision) {
+            parkBush.position.set(randomX, 0.015, randomZ);
+            bushPositions.push({ x: randomX, z: randomZ });
+            validPosition = true;
+        }
+
+        attempts++;
+        if (attempts > 1000) {
+            console.error("Could not find a suitable position for the bush.");
+            break;
+        }
+    }
+
+    park.add(parkBush);
+}
+
+
+
+cityBlock.add(park);
 
 function animate() {
     requestAnimationFrame(animate);
@@ -104,40 +245,6 @@ function animate() {
 }
 
 animate();
-
-const rotation_step = 0.1;
-
-document.addEventListener(
-    'keydown',
-    function (e) {
-        switch (e.key) {
-            case 'ArrowUp': // up
-                cityBase.rotation.x -= rotation_step;
-                break;
-            case 'ArrowDown': // down
-                cityBase.rotation.x += rotation_step;
-                break;
-            case 'ArrowLeft': // left
-                cityBase.rotation.y -= rotation_step;
-                break;
-            case 'ArrowRight': // right
-                cityBase.rotation.y += rotation_step;
-                break;
-            case 'w': // page up
-                cityBase.rotation.z -= rotation_step;
-                break;
-            case 's': // page down
-                cityBase.rotation.z += rotation_step;
-                break;
-            default:
-                break;
-        }
-        camera.lookAt(scene.position);
-        controls.update();
-        renderer.render(scene, camera);
-    },
-    false
-);
 
 window.addEventListener(
     'resize',
