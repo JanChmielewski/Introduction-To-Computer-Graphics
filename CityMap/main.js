@@ -104,7 +104,7 @@ const apartmentBuildingStructureGeometry = new THREE.BoxGeometry(0.2, 0.4,0.2);
 const apartmentBuildingStructureMaterial = new THREE.MeshBasicMaterial({color: 0x8D8D8D} )
 const apartmentBuildingStructure = new THREE.Mesh(apartmentBuildingStructureGeometry, apartmentBuildingStructureMaterial);
 
-const buildingRoofGeometry = new THREE.ConeGeometry(0.14, 0.1, 4, 1, false, 0.78,6.283185307179586);
+const buildingRoofGeometry = new THREE.ConeGeometry(0.14, 0.1, 4, 1, false, 0.785,6.283185307179586);
 const buildingRoofMaterial = new THREE.MeshBasicMaterial({color: 0x777777} );
 const buildingRoof = new THREE.Mesh(buildingRoofGeometry, buildingRoofMaterial);
 
@@ -118,7 +118,7 @@ buildingDoor.position.set(0, -0.16, -0.1);
 
 apartmentBuilding.add(apartmentBuildingStructure, buildingRoof, buildingDoor);
 
-apartmentBuilding.position.set(0.3, 0.214, 0.3);
+apartmentBuilding.position.set(-0.3, 0.214, 0.3);
 cityBlock.add(apartmentBuilding);
 
 const park = new THREE.Group();
@@ -233,10 +233,43 @@ for (let i = 0; i < 5; i++) {
 
     park.add(parkBush);
 }
-
-
-
 cityBlock.add(park);
+
+const house = new THREE.Group();
+
+const houseStructureGeometry = new THREE.BoxGeometry(0.08, 0.05, 0.08);
+const houseStructureMaterial = new THREE.MeshBasicMaterial({color: 0xD3A84E});
+const houseStructureMesh = new THREE.Mesh(houseStructureGeometry, houseStructureMaterial);
+
+const houseRoofGeometry = new THREE.ConeGeometry(0.08, 0.03, 4, 1, false, 0.785, 6.285);
+const houseRoofMaterial = new THREE.MeshBasicMaterial({color: 0xCD7436});
+const houseRoofMesh = new THREE.Mesh(houseRoofGeometry, houseRoofMaterial);
+
+const houseDoorGeometry = new THREE.BoxGeometry(0.02, 0.035,0.001);
+const houseDoorMaterial = new THREE.MeshBasicMaterial({color: 0x8C4A26});
+const houseDoorMesh = new THREE.Mesh(houseDoorGeometry, houseDoorMaterial);
+
+houseStructureMesh.position.set(-0.3, 0.04, -0.3);
+houseRoofMesh.position.set(-0.3, 0.08, -0.3);
+houseDoorMesh.position.set(-0.3, 0.03, -0.26);
+
+house.add(houseStructureMesh, houseRoofMesh, houseDoorMesh);
+
+const house1 = house.clone();
+const house2 = house.clone();
+const house3 = house.clone();
+const house4 = house.clone();
+const house5 = house.clone();
+
+house1.position.set(-0.1, 0, -0.1);
+house2.position.set(0.1, 0, 0.1);
+house3.position.set(0.08, 0, -0.075);
+house4.position.set(-0.1, 0, -0.1);
+house4.rotateY(Math.PI/1);
+house5.position.set(0.1, 0, 0.1);
+house5.rotateY(Math.PI/1);
+
+cityBlock.add(house1, house2, house3, house4, house5);
 
 function animate() {
     requestAnimationFrame(animate);
