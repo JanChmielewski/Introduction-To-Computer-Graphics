@@ -24,7 +24,7 @@ const skyMaterial = new THREE.MeshBasicMaterial({
 const skybox = new THREE.Mesh(skyGeometry, skyMaterial);
 scene.add(skybox);
 
-camera.position.z = 15;
+camera.position.z = 50;
 
 const light = new THREE.PointLight(0xffffff, 1000, 10000);
 light.position.set(0,0,0);
@@ -45,11 +45,7 @@ const sun = new THREE.Mesh(sunGeometry, sunMeshMaterial);
 sun.castShadow = true;
 scene.add(sun);
 
-
-
 // other planets
-const planetColors = [0xD69D29];
-
 const moonAndEarthGroup = new THREE.Group();
 
 const earthTexture = textureLoader.load("textures/earthTexture.jpg");
@@ -65,7 +61,7 @@ earth.castShadow = true;
 earth.receiveShadow = true;
 
 const moonTexture = textureLoader.load("textures/moonTexture.jpg");
-const moonGeometry = new THREE.SphereGeometry(0.5, 32, 16);
+const moonGeometry = new THREE.SphereGeometry(0.35, 32, 16);
 const moonMeshMaterial = new THREE.MeshStandardMaterial({
     map: moonTexture,
     color: 0x5F5F5F,
@@ -79,22 +75,38 @@ moonAndEarthGroup.position.set(15.7,0,0);
 moonAndEarthGroup.add(moon, earth);
 scene.add(moonAndEarthGroup);
 
-
-
-
-
 const earthOrbitRadius = 15.7;
 let earthOrbitSpeed = 0.01;
+
+const marsTexture = textureLoader.load("textures/marsTexture.jpg");
+const marsGeometry = new THREE.SphereGeometry(0.7, 32, 16);
+const marsMeshMaterial = new THREE.MeshStandardMaterial({
+    map: marsTexture,
+    color: 0xD69D29,
+})
+const mars = new THREE.Mesh(marsGeometry, marsMeshMaterial);
+mars.position.set(27.4,0,0);
+scene.add(mars);
+
+const marsOrbitRadius = 27.4;
+let marsOrbitSpeed = 0.005;
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
 
-    // Rotate the Earth around the Sun
+    // Rotate the Earth and Moon around the Sun
     moonAndEarthGroup.position.x = Math.cos(earthOrbitSpeed) * earthOrbitRadius;
     moonAndEarthGroup.position.z = Math.sin(earthOrbitSpeed) * earthOrbitRadius;
+    earth.rotateY(0.03);
+
+    mars.position.x = Math.cos(marsOrbitSpeed) * marsOrbitRadius;
+    mars.position.z = Math.sin(marsOrbitSpeed) * marsOrbitRadius;
+    mars.rotateY(0.003);
 
     // Update the orbit speed for the next frame
     earthOrbitSpeed += 0.01;
+    marsOrbitSpeed += 0.005;
 
     renderer.render(scene, camera);
 }
