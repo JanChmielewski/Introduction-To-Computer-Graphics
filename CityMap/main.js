@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const scene = new THREE.Scene();
@@ -12,12 +11,24 @@ camera.lookAt(scene.position);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-renderer.setClearColor(new THREE.Color(0xA6D8FF));
+renderer.setClearColor(new THREE.Color(0x3E3B3B));
+
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
-const loader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
+
+const skyGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+const skyMaterial = new THREE.MeshBasicMaterial({
+    color: 0x3E3B3B,
+    side: THREE.BackSide, // render the inside faces of the cube
+    map: new THREE.TextureLoader().load('textures/nightSky.jpg'),
+});
+const skybox = new THREE.Mesh(skyGeometry, skyMaterial);
+scene.add(skybox);
 
 const cityBlock = new THREE.Group();
 scene.add(cityBlock);
@@ -84,11 +95,11 @@ const laneDividers = new THREE.Group();
 for (let position = 0.485; position >= -0.5; position -= 0.025) {
     if(position > 0.11 || position < -0.11) {
         const verticalDivider = laneDivider.clone();
-        verticalDivider.position.set(0, 0.01, position);
+        verticalDivider.position.set(0, 0.005, position);
 
         const horizontalDivider = laneDivider.clone();
         horizontalDivider.rotateY(Math.PI / 2);
-        horizontalDivider.position.set(position, 0.01, 0);
+        horizontalDivider.position.set(position, 0.005, 0);
 
         laneDividers.add(verticalDivider, horizontalDivider);
     }
@@ -237,16 +248,19 @@ cityBlock.add(park);
 
 const house = new THREE.Group();
 
+const houseStructureTexture = textureLoader.load("textures/brickWall.jpg");
 const houseStructureGeometry = new THREE.BoxGeometry(0.08, 0.05, 0.08);
-const houseStructureMaterial = new THREE.MeshBasicMaterial({color: 0xD3A84E});
+const houseStructureMaterial = new THREE.MeshBasicMaterial({map: houseStructureTexture, color: 0xCD6D36});
 const houseStructureMesh = new THREE.Mesh(houseStructureGeometry, houseStructureMaterial);
 
+const houseRoofTexture = textureLoader.load("textures/houseRoofTexture.jpg");
 const houseRoofGeometry = new THREE.ConeGeometry(0.08, 0.03, 4, 1, false, 0.785, 6.285);
-const houseRoofMaterial = new THREE.MeshBasicMaterial({color: 0xCD7436});
+const houseRoofMaterial = new THREE.MeshBasicMaterial({map: houseRoofTexture, color: 0xCD5136});
 const houseRoofMesh = new THREE.Mesh(houseRoofGeometry, houseRoofMaterial);
 
+const houseDoorTexture = textureLoader.load("textures/houseDoor.png");
 const houseDoorGeometry = new THREE.BoxGeometry(0.02, 0.035,0.001);
-const houseDoorMaterial = new THREE.MeshBasicMaterial({color: 0x8C4A26});
+const houseDoorMaterial = new THREE.MeshBasicMaterial({map: houseDoorTexture, color: 0x8C4A26});
 const houseDoorMesh = new THREE.Mesh(houseDoorGeometry, houseDoorMaterial);
 
 houseStructureMesh.position.set(-0.3, 0.04, -0.3);
@@ -265,11 +279,47 @@ house1.position.set(-0.1, 0, -0.1);
 house2.position.set(0.1, 0, 0.1);
 house3.position.set(0.08, 0, -0.075);
 house4.position.set(-0.1, 0, -0.1);
-house4.rotateY(Math.PI/1);
+house4.rotateY(Math.PI);
 house5.position.set(0.1, 0, 0.1);
-house5.rotateY(Math.PI/1);
+house5.rotateY(Math.PI);
 
 cityBlock.add(house1, house2, house3, house4, house5);
+
+//traffic lights
+const trafficLight = new THREE.Group();
+
+const poleGeometry = new THREE.CylinderGeometry(0.005, 0.005, 0.08);
+const poleMaterial = new THREE.MeshBasicMaterial({color: 0x2E2828});
+const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+
+const trafficLightsBoxGeometry = new THREE.BoxGeometry(0.03, 0.03, 0.04);
+const trafficLightBoxMaterial = new THREE.MeshBasicMaterial({color: 0x2E2828});
+const trafficLightBox = new THREE.Mesh(trafficLightsBoxGeometry, trafficLightBoxMaterial);
+
+pole.position.set(0,0.045, 0);
+trafficLightBox.rotateX(Math.PI/2);
+trafficLightBox.position.set(0, 0.095,0);
+
+// adding lights
+scene.remove(scene.children.find((child) => child.ty === 'AmbientLight'));
+
+const ambientLight = new THREE.AmbientLight(0x000000);
+scene.add(ambientLight);
+
+const redLight = new THREE.PointLight(0xFF0000, 100, 5);
+redLight.castShadow = true;
+const yellowLight = new THREE.PointLight(0xFFFF00, 100, 5);
+yellowLight.castShadow = true;
+const greenLight = new THREE.PointLight(0x00FF00, 100, 5);
+greenLight.castShadow = true;
+
+redLight.position.set(0, 0.012, 0);
+yellowLight.position.set(0, 0.0, 0);
+greenLight.position.set(0, -0.012, 0);
+
+trafficLight.add(pole, trafficLightBox, redLight, yellowLight, greenLight);
+
+cityBlock.add(trafficLight);
 
 function animate() {
     requestAnimationFrame(animate);
